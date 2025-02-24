@@ -70,24 +70,24 @@ actor {
     // };
 
     public shared ({ caller }) func addUserResult(result : Text) : async Result.Result<{ id : Nat; results : [Text] }, Text> {
-        // 呼び出し元の Principal に対応するユーザーIDを取得
+        // get user id
         let maybeId = Map.get(userIdMap, phash, caller);
         switch (maybeId) {
             case (?id) {
-                // 現在の結果を取得（存在しなければ空の配列を返す）
+                // get current results
                 let currentResults = switch (Map.get(userResultsMap, nhash, id)) {
                     case (?results) results;
                     case (_) ([] : [Text])
                 };
-                // 現在の結果配列をリストに変換
+                // convert current results to list
                 let currentList = List.fromArray(currentResults);
-                // 新しい結果をリストに変換
+                // convert new result to list
                 let newList = List.fromArray([result]);
-                // ２つのリストを連結
+                // combine the two lists
                 let updatedList = List.append(currentList, newList);
-                // 連結結果を再び配列に変換
+                // convert the combined list back to an array
                 let updatedResults = List.toArray(updatedList);
-                // 結果マップを更新
+                // update the user results
                 Map.set(userResultsMap, nhash, id, updatedResults);
                 return #ok({ id = id; results = updatedResults });
             };
@@ -99,20 +99,16 @@ actor {
 
 
 
-
-
-
-
     // public query ({ caller }) func getUserResults() : async Result.Result<{ id : Nat; results : [Text] }, Text> {
     //     return #ok({ id = 123; results = ["fake result"] });
     // };
 
     public query ({ caller }) func getUserResults() : async Result.Result<{ id : Nat; results : [Text] }, Text> {
-        // Retrieve the user ID associated with the caller's Principal
+        // Retrieve the user id associated with the caller's Principal.
         let maybeId = Map.get(userIdMap, phash, caller);
         switch (maybeId) {
             case (?id) {
-                // Retrieve the stored results for the user, defaulting to an empty vector if none exist
+                // Retrieve the stored results for the user, defaulting to an empty array if none exist.
                 let maybeResults = Map.get(userResultsMap, nhash, id);
                 switch (maybeResults) {
                     case (?results) {
